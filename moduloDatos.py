@@ -9,8 +9,11 @@ import numpy as np
 #     datos = cargaDatos(fichero)
 #     print(datos.head(5))
 
-def cargaDatos(ruta,fichero):
-    datos = pd.read_csv(ruta+fichero)
+#def cargaDatos(ruta,fichero):
+#   datos = pd.read_csv(ruta+fichero)
+#    return datos
+def cargarDatos(ruta,fichero,separador=','):
+    datos = pd.read_csv(ruta+fichero,sep=separador)
     return datos
 
 #Obtencion de datos de las columnas 
@@ -18,7 +21,7 @@ def obtenerDatosColumnas(datos):
     datosColumna = datos.columns
     return datosColumna
 
-def cambiarTitulosCabecera(datos,columnas):
+def cambiarTitulosColumnas(datos,columnas):
     datos.columns = columnas
     return datos
 
@@ -54,7 +57,10 @@ def normalizacionDatos1(datos,columna):
 def normalizacionDatos2(datos,columna):
     datos[columna] = (datos[columna]-datos[columna].min())/(datos[columna].max()-datos[columna].min())
     return datos
-    
+def obtenerValoresDummies(datos,columna):
+    datos = pd.get_dummies(datos[columna])
+    return datos
+
 
 
 
@@ -63,7 +69,7 @@ if __name__ == '__main__':
     #Tests
     ruta = 'G:\\2023-Proyectos\\Proyectos\Carpeta-Github\\DataScience-MachineLearming\\efectivo1DS\\Codigos\\'
     fichero = 'precios_carros.csv'
-    datos = cargaDatos(ruta,fichero)
+    datos = cargarDatos(ruta,fichero)
     print(datos.head(5))
     print(obtenerDatosColumnas(datos))
     print(guardarDatos(datos,ruta,'copia.csv'))

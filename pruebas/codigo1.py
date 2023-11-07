@@ -19,3 +19,7 @@ class Test(unittest.TestCase):
 #Ejecucion de testeo
 if __name__ == '__main__':
     unittest.main()
+
+#NOTE: C-x g --> git status con magic
+#NOTE: C-x b --> cambiar de buffer
+#NOTE: C-c t --> project-file

@@ -21,8 +21,19 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+#Aplicando regression lineal
+from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
+#Aplicando regression logistica
+from sklearn.linear_model import LogisticRegression
+#Aplicando KNN
+from sklearn.neighbors import KNeighborsClassifier
+#Aplicando Arboles de decision
+from sklearn.tree import DecisionTreeClassifier
+#Aplicando Arboles de decision aleatorios
+from sklearn.ensemble import RandomForestClassifier
 
+from sklearn import metrics
 prod = pd.read_csv('1ero.csv',encoding='latin-1',delimiter=";") #latin-1 ->sirve para caracteres especiales
 prod.head()
 print(prod.head())
@@ -91,28 +102,66 @@ columnas_objetivo = ['PROMEDIO_X_SECCION', 'NRO_DE_ESTUDIANTES_MATRICULADOS', 'N
                      'P1_C1', 'P2_C1', 'P3_C2', 'P4_C1', 'P5_C2', 'P6_C2', 'P7_C1',
                      'P8_C3', 'P9_C3', 'P10_C2', 'P11_C2', 'P12_C2', 'P13_C3', 'P14_C2',
                      'P15_C3', 'CAPACIDADES_C1', 'CAPACIDADES_C2', 'CAPACIDADES_C3']
-df_objetivo =prod[columnas_objetivo]
+df_objetivo =df_formateado[columnas_objetivo]
 print(df_objetivo.head())
 
 #Boxplot 1
 plt.figure(figsize=(12,6))
 sns.boxplot(x='NRO_DE_ESTUDIANTES_MATRICULADOS', y='PROMEDIO_X_SECCION', data=df_objetivo)
 plt.title('Boxplot Nro estudiantes matriculados vs. Promedio x Seccion')
+plt.text(35,27,'Tabla de Comprension de Textos',color='red')
 plt.show()
 #Boxplot 2
 plt.figure(figsize=(12,6))
 sns.boxplot(x='NRO_DE_ESTUDIANTES_EVALUADOS', y='PROMEDIO_X_SECCION', data=df_objetivo)
 plt.title('Boxplot Nro estudiantes evaluados vs. Promedio x Seccion')
+plt.text(35,27,'Tabla de Comprension de Textos',color='red')
 plt.show()
 #Boxplot 3
 plt.figure(figsize=(12,6))
 sns.boxplot(x='P1_C1', y='PROMEDIO_X_SECCION', data=df_objetivo)
 plt.title('Boxplot Nro alumnos P1_C1 vs. Promedio x Seccion')
-plt.text
+plt.text(1,27,'P1_C1:Nro de estudiantes que hicieron correctamente la competencia 1 de la pregunta 1')
+plt.text(35,27,'Tabla de Comprension de Textos',color='red')
+plt.show()
+#Boxplot 4
+plt.figure(figsize=(12,6))
+sns.boxplot(x='P2_C1', y='PROMEDIO_X_SECCION', data=df_objetivo)
+plt.title('Boxplot Nro alumnos P2_C1 vs. Promedio x Seccion')
+plt.text(1,27,'P2_C1:Nro de estudiantes que hicieron correctamente la competencia 1 de la pregunta 2')
+plt.text(35,27,'Tabla de Comprension de Textos',color='red')
+plt.show()
+#Boxplot 5
+plt.figure(figsize=(12,6))
+sns.boxplot(x='P3_C2', y='PROMEDIO_X_SECCION', data=df_objetivo)
+plt.title('Boxplot Nro alumnos P3_C2 vs. Promedio x Seccion')
+plt.text(1,27,'P2_C1:Nro de estudiantes que hicieron correctamente la competencia 2 de la pregunta 3')
+plt.text(35,27,'Tabla de Comprension de Textos',color='red')
 plt.show()
 
-
-
+#Boxplot 6
+plt.figure(figsize=(12,6))
+sns.boxplot(x='P4_C1', y='PROMEDIO_X_SECCION', data=df_objetivo)
+plt.title('Boxplot Nro alumnos P4_C1 vs. Promedio x Seccion')
+plt.text(1,27,'P2_C1:Nro de estudiantes que hicieron correctamente la competencia 1 de la pregunta 4')
+plt.text(35,27,'Tabla de Comprension de Textos',color='red')
+plt.show()
+#Boxplot 7
+plt.figure(figsize=(12,6))
+sns.boxplot(x='CAPACIDADES_C1', y='PROMEDIO_X_SECCION', data=df_objetivo)
+plt.title('Boxplot CAPACIDADES_C1 vs. Promedio x Seccion')
+plt.text(-1,27,'Nivel 1 o 3:Indica un nivel de desempeño basico o insuficiente en la capacidad evaluada',size=7)
+plt.text(-1,26,'Nivel 4 o 5:Puede representar un nivel de desempeño intermedio',size=7)
+plt.text(-1,25,'Nivel 6 o 10:Puede indicar un nivel excelente de desenpeño',size=7)
+plt.show()
+#Boxplot 8
+plt.figure(figsize=(12,6))
+sns.boxplot(x='CAPACIDADES_C2', y='PROMEDIO_X_SECCION', data=df_objetivo)
+plt.title('Boxplot CAPACIDADES_C2 vs. Promedio x Seccion')
+plt.text(-1,27,'Nivel 1 o 3:Indica un nivel de desempeño basico o insuficiente en la capacidad evaluada',size=7)
+plt.text(-1,26,'Nivel 4 o 5:Puede representar un nivel de desempeño intermedio',size=7)
+plt.text(-1,25,'Nivel 6 o 10:Puede indicar un nivel excelente de desenpeño',size=7)
+plt.show()
 matriz_corr = df_objetivo.corr()
 plt.figure(figsize=(12,6))
 sns.heatmap(matriz_corr,annot=True,cmap='coolwarm',fmt='.2f',linewidths=0.5)
@@ -120,27 +169,52 @@ plt.title('Mapa de calor - Matriz de correlacion')
 plt.show()
 
 
+seleccionadas=matriz_corr.loc[:,["CAPACIDADES_C1","CAPACIDADES_C2","CAPACIDADES_C3"]]
+sns.pairplot(seleccionadas)
 
+plt.show()
 
+#4->Establecer el grupo de datos:Train y Test a los resultados aplicados al item 3 ->2 puntos
+X=matriz_corr.loc[:,["CAPACIDADES_C1","CAPACIDADES_C2","CAPACIDADES_C3"]]
+Y=matriz_corr.loc[:,["PROMEDIO_X_SECCION"]]
+X_train, X_test, y_train, y_test = train_test_split(X,Y,test_size=0.3,random_state=42)
 
+#5->Aplicar regression lineal/Regresion logistica/KNN Vecinos/Arboles de decision
+#   /Arboles de decision aleatorios a cada grupo de datos -> 4 puntos si aplica correctamente
+lm = LinearRegression()
+lm.fit(X_train,y_train)
+lm.coef_
+print(str(lm.coef_))
 
+predicciones = lm.predict(X_test)
+print(predicciones)
 
+DatFrame_predicciones = pd.DataFrame(predicciones)
+DatFrame_predicciones.reset_index(drop=True,inplace=True)
+y_test.reset_index(drop=True,inplace=True)
+df_unido = pd.concat([y_test, DatFrame_predicciones], axis=1)
+df_unido.columns = ['y_test', 'predicciones']
+print(df_unido)
+#Metricas
+print('MAE:', metrics.mean_absolute_error(y_test, predicciones))
+print('MSE:', metrics.mean_squared_error(y_test, predicciones))
+print('RMSE:', np.sqrt(metrics.mean_squared_error(y_test, predicciones)))
+#Graica de metricas
+sns.distplot((y_test-predicciones),bins=50)
+plt.show()
+#Aplicando regression logistica
+logmodel = LogisticRegression()
+logmodel.fit(X_train,y_train)
+predictions = logmodel.predict(X_test)
+print(predictions)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+DatFrame_prediccionesLog = pd.DataFrame(predictions)
+DatFrame_prediccionesLog.reset_index(drop=True,inplace=True)
+y_test.reset_index(drop=True,inplace=True)
+df_unidoLog = pd.concat([y_test, DatFrame_prediccionesLog], axis=1)
+df_unidoLog.columns = ['y_test', 'predicciones']
+print(df_unidoLog)
+#Metricas
+print('MAE:', metrics.mean_absolute_error(y_test, predictions))
+print('MSE:', metrics.mean_squared_error(y_test, predictions))
+print('RMSE:', np.sqrt(metrics.mean_squared_error(y_test, predictions)))

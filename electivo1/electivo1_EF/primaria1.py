@@ -24,16 +24,14 @@ import seaborn as sns
 #Aplicando regression lineal
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
-#Aplicando regression logistica
 from sklearn.linear_model import LogisticRegression
-#Aplicando KNN
 from sklearn.neighbors import KNeighborsClassifier
-#Aplicando Arboles de decision
 from sklearn.tree import DecisionTreeClassifier
-#Aplicando Arboles de decision aleatorios
 from sklearn.ensemble import RandomForestClassifier
-
 from sklearn import metrics
+from sklearn.metrics import classification_report
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import roc_curve
 prod = pd.read_csv('1ero.csv',encoding='latin-1',delimiter=";") #latin-1 ->sirve para caracteres especiales
 prod.head()
 print(prod.head())
@@ -199,22 +197,119 @@ print(df_unido)
 print('MAE:', metrics.mean_absolute_error(y_test, predicciones))
 print('MSE:', metrics.mean_squared_error(y_test, predicciones))
 print('RMSE:', np.sqrt(metrics.mean_squared_error(y_test, predicciones)))
-#Graica de metricas
+#Grafica de metricas
 sns.distplot((y_test-predicciones),bins=50)
 plt.show()
+            
+
+
+#Identificar si un colegio tiene un rendimiento satisfactorio en la Competencia 2 (C2) de la
+#Pregunta 3 (P3_C2). Se considerara que el rendimiento es satisfactorio si un porcentaje especifico
+#(definido por el umbral) de los estudiantes evaluados en esta competencia obtiene un puntaje alto.
+umbral_absoluto_C2_P3= 0.8
+umbral_calculado_C2_P3=df_formateado['NRO_DE_ESTUDIANTES_EVALUADOS']*umbral_absoluto_C2_P3
+
+#1 si el rendimiento es satisfactorio, 0 si no lo es
+
+df_formateado['Rendimiento_Satisfactorio_C2_P3'] = np.where(df_formateado['P3_C2']>=umbral_calculado_C2_P3,1,0)
+
+columnas_caracteristicas = ['NRO_DE_ESTUDIANTES_MATRICULADOS',
+                            'NRO_DE_ESTUDIANTES_EVALUADOS','P3_C2']
+columna_objeClass = ['Rendimiento_Satisfactorio_C2_P3']
+#Crear un nuevo dataframe con las columnas seleccionadas
+df_objeClass = df_formateado[columnas_caracteristicas + columna_objeClass]
+print(df_objeClass.head())
+
+#Establecer el grupo de datos:Train y Test a los resultados aplicados
+X = df_objeClass.drop('Rendimiento_Satisfactorio_C2_P3',axis=1)
+Y = df_objeClass['Rendimiento_Satisfactorio_C2_P3']
+X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.30, random_state=100)
+
 #Aplicando regression logistica
-logmodel = LogisticRegression()
-logmodel.fit(X_train,y_train)
-predictions = logmodel.predict(X_test)
+logModel = LogisticRegression()
+logModel.fit(X_train,y_train)
+predictions = logModel.predict(X_test)
 print(predictions)
 
-DatFrame_prediccionesLog = pd.DataFrame(predictions)
-DatFrame_prediccionesLog.reset_index(drop=True,inplace=True)
-y_test.reset_index(drop=True,inplace=True)
-df_unidoLog = pd.concat([y_test, DatFrame_prediccionesLog], axis=1)
-df_unidoLog.columns = ['y_test', 'predicciones']
-print(df_unidoLog)
-#Metricas
-print('MAE:', metrics.mean_absolute_error(y_test, predictions))
-print('MSE:', metrics.mean_squared_error(y_test, predictions))
-print('RMSE:', np.sqrt(metrics.mean_squared_error(y_test, predictions)))
+print(classification_report(y_test, predictions))
+confusion_matrix(y_test, predictions)
+#Curva ROC
+roc_curve(y_test, predictions, pos_label=1)
+fpr,tpr,threshold = roc_curve(y_test, predictions, pos_label=1)
+plt.plot(fpr,tpr)
+plt.show()
+print(fpr)
+print(tpr)
+print(threshold)
+
+#Aplicando KNN
+knn = KNeighborsClassifier(n_neighbors=1)
+knn.fit(X_train,y_train)
+pred = knn.predict(X_test)
+print(pred)
+reporte = classification_report(y_test,pred)
+print(reporte)
+tabla = confusion_matrix(y_test,pred)
+print(tabla)
+#->Real->Negativo->Negativo(N)->a:(TN)
+#->Real->Negativo->Positivo(P)->b:(FP)
+#->Real->Positivo->Negativo(N)->c:(FN)
+#->Real->Positivo->Positivo(P)->d:(TP)
+#Precision ('precision')
+#Porcentaje predicciones positivas correctas
+#d/b+d
+#Sensibilidad exhaustividad ('recall')
+#Porcentaje de casos positivos detectados
+#d/(d+c)
+#Especifidad ('specificity')
+#Porcentaje de casos negativos detectados
+#a/(a+b)
+#Exactitud ('accuracy')
+#Porcentaje de predicciones correctas
+#No sirve en datasets poco equilibrados
+#(a+d)/(a+b+c+d)
+#Calculando la exactitud
+"""
+[[11  1]
+ [ 0  7]]
+"""
+print(11+7)
+print(11+1+0+7)
+print((11+7)/(11+1+0+7))
+#o tambien se puede calcular asi
+#print((tabla[0][0]+tabla[1][1])/(tabla[0][0]+tabla[0][1]+tabla[1][0]+tabla[1][1]))
+#Ccalculamos la puntuacion F1
+knn.score(X_test,y_test)
+print(knn.score(X_test,y_test))
+#Calculamos la puntuacion F1 a nivel de train
+knn.score(X_train,y_train)
+print(knn.score(X_train,y_train))
+#Establecemos un numero de vecinos
+vecinos = np.arange(1,25)
+print(vecinos)
+train_2=np.empty(len(vecinos))
+test_2=np.empty(len(vecinos))
+print(train_2)
+print(test_2)
+#Ahora tambien generamos el bucle con los vecinos para entrenamiento como test
+#Generamos un bucle para registrar los datos en las matrices
+for i,k in enumerate(vecinos):
+    knn = KNeighborsClassifier(n_neighbors=k)
+    knn.fit(X_train,y_train)
+    train_2[i]=knn.score(X_train,y_train)
+    test_2[i]=knn.score(X_test,y_test)
+print(train_2)
+print(test_2)
+#Grafico de vecinos vs Test
+plt.title('k-NN: VECINOS VS TEST')
+plt.plot(vecinos,test_2,label='Exactirud de Test')
+plt.plot(vecinos,train_2,label='Exactitud de Train')
+plt.legend()
+plt.xlabel('Numero de Vecinos')
+plt.ylabel('Exactitud')
+plt.show()
+#Aplicando Arboles de decision
+decision_tree = DecisionTreeClassifier()
+decision_tree.fit(X_train,y_train)
+predict = decision_tree.predict(X_test)
+print(predict)

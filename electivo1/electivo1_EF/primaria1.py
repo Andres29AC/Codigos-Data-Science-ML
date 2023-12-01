@@ -27,6 +27,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
+from sklearn import tree
 from sklearn.ensemble import RandomForestClassifier
 from sklearn import metrics
 from sklearn.metrics import classification_report
@@ -39,12 +40,7 @@ columnas = prod.head().columns
 print(columnas)
 prod.info()
 
-"""
- N;RED;INSTITUCION_EDUCATIVA;GRADO;SECCION;TURNO;NRO_DE_ESTUDIANTES_MATRICULADOS;NRO_DE_ESTUDIANTES_EVALUADOS
-;P 1_C1;P 2_C1;P 3_C2;P 4_C1;P 5_C2;P 6_C2;P 7_C1;P 8_C3;P 9_C3;P 10_C2;P 11_C2;P 12_C2;P 13_C3;P 14_C2;
-P 15_C3;P 16;P 17;P 18;P 19;P 20;CAPACIDADES_C1;CAPACIDADES_C2;CAPACIDADES_C3;%_POR_CAPACIDAD_C1;
-%_POR_CAPACIDAD_C2;%_POR_CAPACIDAD_C3;PROMEDIO_X_SECCION
-"""
+
 #N->Numeracion de la institucion educativas en el registro
 #RED->Red a la que pertenece la institucion educativa
 #INSTITUCION_EDUCATIVA->Nombre de la institucion educativao
@@ -230,7 +226,9 @@ logModel = LogisticRegression()
 logModel.fit(X_train,y_train)
 predictions = logModel.predict(X_test)
 print(predictions)
-
+#Calculando la exactitud
+print(logModel.score(X_test,y_test))
+print(logModel.score(X_train,y_train))
 print(classification_report(y_test, predictions))
 confusion_matrix(y_test, predictions)
 #Curva ROC
@@ -247,10 +245,8 @@ knn = KNeighborsClassifier(n_neighbors=1)
 knn.fit(X_train,y_train)
 pred = knn.predict(X_test)
 print(pred)
-reporte = classification_report(y_test,pred)
-print(reporte)
-tabla = confusion_matrix(y_test,pred)
-print(tabla)
+print(classification_report(y_test,pred))
+print(confusion_matrix(y_test,pred))
 #->Real->Negativo->Negativo(N)->a:(TN)
 #->Real->Negativo->Positivo(P)->b:(FP)
 #->Real->Positivo->Negativo(N)->c:(FN)
@@ -311,5 +307,35 @@ plt.show()
 #Aplicando Arboles de decision
 decision_tree = DecisionTreeClassifier()
 decision_tree.fit(X_train,y_train)
-predict = decision_tree.predict(X_test)
-print(predict)
+# predict = decision_tree.predict(X_test)
+# print(predict)
+#Mostrando el arbol
+tree.plot_tree(decision_tree)
+plt.show()
+#Extremos parte del arbol
+X_nombre = list(X.columns)
+print(X_nombre)
+classes = ['No','Si']
+fig, axes = plt.subplots(nrows = 1,ncols = 1,figsize = (3,3), dpi=300)
+tree.plot_tree(decision_tree,feature_names=X_nombre,class_names=classes,filled=True)
+fig.savefig('arbol.png')
+#Creamos las predicciones
+predTree = decision_tree.predict(X_test)
+print(predTree)
+#Calculamos la exactitud
+print(decision_tree.score(X_test,y_test))
+print(decision_tree.score(X_train,y_train))
+
+print(classification_report(y_test,predTree))
+print(confusion_matrix(y_test,predTree))
+
+#Aplicando Arboles de decision aleatorios
+random_forest = RandomForestClassifier(n_estimators=40,random_state=33)
+random_forest.fit(X_train,y_train)
+predict_random = random_forest.predict(X_test)
+#Calculamos la exactitud
+print(random_forest.score(X_test,y_test))
+print(random_forest.score(X_train,y_train))
+
+print(classification_report(y_test,predict_random))
+print(confusion_matrix(y_test,predict_random))

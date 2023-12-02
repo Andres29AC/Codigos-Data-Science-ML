@@ -198,9 +198,10 @@ sns.distplot((y_test-predicciones),bins=50)
 plt.show()
             
 
-
+#2 objetivo de prediccion de tipo clasificacion
 #Identificar si un colegio tiene un rendimiento satisfactorio en la Competencia 2 (C2) de la
-#Pregunta 3 (P3_C2). Se considerara que el rendimiento es satisfactorio si un porcentaje especifico
+#Pregunta 3 (P3_C2).
+#Se considerara que el rendimiento es satisfactorio si un porcentaje especifico
 #(definido por el umbral) de los estudiantes evaluados en esta competencia obtiene un puntaje alto.
 umbral_absoluto_C2_P3= 0.8
 umbral_calculado_C2_P3=df_formateado['NRO_DE_ESTUDIANTES_EVALUADOS']*umbral_absoluto_C2_P3
@@ -239,6 +240,13 @@ plt.show()
 print(fpr)
 print(tpr)
 print(threshold)
+plt.plot(fpr,tpr,color='orange',label='Curva ROC')
+plt.plot([0,1],[0,1],color='darkblue',linestyle='--',label='Curva ROC nula')
+plt.xlabel('Tasa de Falsos Positivos-FPR')
+plt.ylabel('Tasa de Verdaderos Positivos-TPR')
+plt.title('Curva ROC')
+plt.legend()
+plt.show()
 
 #Aplicando KNN
 knn = KNeighborsClassifier(n_neighbors=1)
